@@ -13,7 +13,7 @@ RUN yum -y update
 RUN yum -y install scl file gcc gcc-gfortran gcc-c++ glibc.i686 libgcc.i686 libpng-devel jasper \
   jasper-devel hostname m4 make perl tar bash tcsh time wget which zlib zlib-devel \
   openssh-clients openssh-server net-tools fontconfig libgfortran libXext libXrender \
-  ImageMagick sudo epel-release git
+  ImageMagick sudo epel-release git ca-certificates
 
 # Newer version of GNU compiler, required for WRF 2003 and 2008 Fortran constructs
 
@@ -48,7 +48,7 @@ RUN source /opt/rh/devtoolset-8/enable \
 RUN mkdir -p /wrf/libs/hdf5/BUILD_DIR
 RUN source /opt/rh/devtoolset-8/enable \
  && cd /wrf/libs/hdf5/BUILD_DIR \
- && git clone https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git \
+ && git clone https://github.com/HDFGroup/hdf5.git \
  && cd hdf5 \
  && git checkout hdf5-1_10_4 \
  && ./configure --enable-fortran --enable-cxx --prefix=/usr/local/ &> /wrf/libs/build_log_hdf5_config \
@@ -88,7 +88,7 @@ RUN mkdir -p  /wrf/WPS_GEOG /wrf/wrfinput /wrf/wrfoutput \
  &&  chmod 6755 /wrf /wrf/WPS_GEOG /wrf/wrfinput /wrf/wrfoutput /usr/local
 
 # Download NCL
-RUN curl -SL https://ral.ucar.edu/sites/default/files/public/projects/ncar-docker-wrf/nclncarg-6.3.0.linuxcentos7.0x8664nodapgcc482.tar.gz | tar zxC /usr/local
+RUN curl -SL https://www.earthsystemgrid.org/api/v1/dataset/ncl.662_2.nodap/file/ncl_ncarg-6.6.2-CentOS7.6_64bit_nodap_gnu485.tar.gz | tar zxC /usr/local
 ENV NCARG_ROOT /usr/local
 
 # Set environment for interactive container shells
@@ -118,13 +118,13 @@ WORKDIR /wrf
 # Download data
 ARG argname=tutorial
 RUN echo DAVE $argname
-RUN if [ "$argname" = "tutorial" ] ; then curl -SL http://www2.mmm.ucar.edu/wrf/src/wps_files/geog_low_res_mandatory.tar.gz | tar -xzC /wrf/WPS_GEOG ; fi
-RUN if [ "$argname" = "tutorial" ] ; then curl -SL http://www2.mmm.ucar.edu/wrf/TUTORIAL_DATA/colorado_march16.new.tar.gz | tar -xzC /wrf/wrfinput ; fi
-RUN if [ "$argname" = "tutorial" ] ; then curl -SL http://www2.mmm.ucar.edu/wrf/src/namelists_v$NML_VERSION.tar.gz  | tar -xzC /wrf/wrfinput ; fi
-RUN if [ "$argname" = "tutorial" ] ; then curl -SL http://www2.mmm.ucar.edu/wrf/TUTORIAL_DATA/WRF_NCL_scripts.tar.gz | tar -xzC /wrf ; fi
-RUN if [ "$argname" = "regtest" ]  ; then curl -SL http://www2.mmm.ucar.edu/wrf/dave/DATA/Data_small/data_SMALL.tar.gz | tar -xzC /wrf ; fi
-RUN if [ "$argname" = "regtest" ]  ; then curl -SL http://www2.mmm.ucar.edu/wrf/dave/nml.tar.gz | tar -xzC /wrf ; fi
-RUN if [ "$argname" = "regtest" ]  ; then curl -SL http://www2.mmm.ucar.edu/wrf/dave/script.tar | tar -xC /wrf ; fi
+RUN if [ "$argname" = "tutorial" ] ; then curl --insecure -SL https://www2.mmm.ucar.edu/wrf/src/wps_files/geog_low_res_mandatory.tar.gz | tar -xzC /wrf/WPS_GEOG ; fi
+RUN if [ "$argname" = "tutorial" ] ; then curl --insecure -SL https://www2.mmm.ucar.edu/wrf/TUTORIAL_DATA/colorado_march16.tar.gz | tar -xzC /wrf/wrfinput ; fi
+RUN if [ "$argname" = "tutorial" ] ; then curl --insecure -SL https://www2.mmm.ucar.edu/wrf/src/namelists_v$NML_VERSION.tar.gz  | tar -xzC /wrf/wrfinput ; fi
+RUN if [ "$argname" = "tutorial" ] ; then curl --insecure -SL https://www2.mmm.ucar.edu/wrf/TUTORIAL_DATA/NCL_scripts.tar.gz | tar -xzC /wrf ; fi
+RUN if [ "$argname" = "regtest" ]  ; then curl --insecure -SL https://www2.mmm.ucar.edu/wrf/dave/DATA/Data_small/data_SMALL.tar.gz | tar -xzC /wrf ; fi
+RUN if [ "$argname" = "regtest" ]  ; then curl --insecure -SL https://www2.mmm.ucar.edu/wrf/dave/nml.tar.gz | tar -xzC /wrf ; fi
+RUN if [ "$argname" = "regtest" ]  ; then curl --insecure -SL https://www2.mmm.ucar.edu/wrf/dave/script.tar | tar -xC /wrf ; fi
 
 # Download wps source
 RUN if [ "$argname" = "tutorial" ] ; then git clone https://github.com/wrf-model/WPS.git WPS ; fi
